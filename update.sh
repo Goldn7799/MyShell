@@ -1,11 +1,13 @@
 echo "BackUp"
 cp ./db.json ../
 cp ./history.json ../
-rm -rf .
+cd ..
+rm -rf MyShell
 echo "installing requirement"
 sudo apt install nodejs npm wget git -y
 echo "Downloading JS"
-git clone https://github.com/Goldn7799/MyShell.git .
+git clone https://github.com/Goldn7799/MyShell.git
+cd MyShell
 npm i
 echo "Removing Template"
 rm -rf .git
