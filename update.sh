@@ -19,5 +19,5 @@ echo "Restore Backup"
 cp ../db.json ./
 cp ../history.json ./
 rm ../db.json
-rm ../db.json
+rm ../history.json
 echo "Done, Start with cd MyShell and run npm start"
