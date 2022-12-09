@@ -90,6 +90,7 @@ const search = (item)=>{
     cmd();
   }else if (item == "help"||item == "?"){
     console.log(`
+      mgr update //update Shell
       clear //for clear shell
       help //show command list
       runos <command> //run shell command
