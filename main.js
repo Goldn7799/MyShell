@@ -524,7 +524,7 @@ const manager = (act)=>{
                     var ac = prompt("Update? [Y/N]: ");
                     if (ac == "Y"){
                       console.log("Downloading Updates.....")
-                      exec(`bash <(curl https://raw.githubusercontent.com/Goldn7799/MyShell/main/update.sh)`, (errors, stdouts, stderrs)=>{
+                      exec(`curl https://raw.githubusercontent.com/Goldn7799/MyShell/main/update.sh | bash`, (errors, stdouts, stderrs)=>{
                         if (errors){
                           console.log(errors)
                           cmd()
