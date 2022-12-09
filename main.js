@@ -105,6 +105,8 @@ const search = (item)=>{
       edir //enter dirs
       hdir //back to home dirs
       pdir //enter process dir
+      remove <file> //Remove File
+      remove --dir <dir> //Remove Dir
       exit //exit console
       `)
     cmd();
@@ -236,37 +238,51 @@ const search = (item)=>{
       console.log(stdout);
       cmd();
   });
-  }else if (item.substring(0, 2) == "rm"){
-    if (item.substring(0, 8) == "rm --dir"){
-      if(`${dirs}/${item.substring(9)}` == process.cwd()){
+  }else if (item.substring(0, 6) == "remove"){
+    if (item.substring(0, 12) == "remove --dir"){
+      if(`${dirs}/${item.substring(13)}` == process.cwd()){
+        console.log("Protected Dir");
+        cmd();
+      }else if (`${dirs}/${item.substring(13)}` == os.homedir()){
+        console.log("Protected Dir");
+        cmd();
+      }else if (`${dirs}/${item.substring(13)}` == `${os.homedir()}/`){
+        console.log("Protected Dir");
+        cmd();
+      }
+      else if (`${dirs}/${item.substring(13)}` == `${process.cwd()}/`){
         console.log("Protected Dir");
         cmd();
       }else{
-        fs.rmdir(`${dirs}/${item.substring(9)}`, err=>{
+        fs.rmdir(`${dirs}/${item.substring(13)}`, err=>{
           if (err){
             console.error(`Error : ${err}`);
             cmd();
           }else {
-            console.log(`Succesfully Remove ${item.substring(9)} Dirs`);
+            console.log(`Succesfully Remove ${item.substring(13)} Dirs`);
             cmd();
           }
         })
       }
     }else {
-      if(`${dirs}/${item.substring(3)}` == `${process.cwd()}/main.js`){
+      if(`${dirs}/${item.substring(7)}` == `${process.cwd()}/main.js`){
         console.log("Protected File");
         cmd();
+      }else{
+        fs.rm(`${dirs}/${item.substring(7)}`, err=>{
+          if (err){
+            console.error(`Error : ${err}`);
+            cmd();
+          }else {
+            console.log(`Succesfully Remove ${item.substring(7)} Files`);
+            cmd();
+          }
+        })
       }
-      fs.rm(`${dirs}/${item.substring(3)}`, err=>{
-        if (err){
-          console.error(`Error : ${err}`);
-          cmd();
-        }else {
-          console.log(`Succesfully Remove ${item.substring(3)} Files`);
-          cmd();
-        }
-      })
+      
     }
+  }else if (item.substring(0, 4) == "copy"){
+    console.debug("Soon...")
   }
   else if(item.substring(0, 4) == "edir"){
     renDirs = item.substring(5);
