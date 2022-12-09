@@ -283,6 +283,8 @@ const search = (item)=>{
     }
   }else if (item.substring(0, 4) == "copy"){
     console.debug("Soon...")
+  }else if(item.substring(0, 3) == "mgr"){
+    manager(item.substring(4));
   }
   else if(item.substring(0, 4) == "edir"){
     renDirs = item.substring(5);
@@ -489,6 +491,59 @@ const creates = (items) => {
   else{
     console.error(`${items} Not Found`);
     cmd()
+  }
+}
+
+const manager = (act)=>{
+  if (act == "update"){
+    console.log("Fetching Updates...")
+    // https://raw.githubusercontent.com/Goldn7799/MyShell/main/package.json
+    exec(`wget -O temp.txt https://raw.githubusercontent.com/Goldn7799/MyShell/main/package.json`, (error, stdout, stderr) => {
+      if (error) {
+          console.log(`error: ${error.message}`);
+          // return;
+          cmd()
+      }else {
+          fs.readFile("./temp.txt", "utf-8", (err, data)=>{
+            if(err){
+              console.error(`Error : ${err}`);
+              cmd()
+            }else {
+              let info = JSON.parse(data);
+              fs.readFile("./package.json", "utf-8", (error, datas)=>{
+                if(error){
+                  console.error(`Error : ${error}`);
+                  cmd()
+                }else {
+                  let currentInfo = JSON.parse(datas);
+                  if(currentInfo.version != info.version){
+                    console.log(`Update Avabile`)
+                    console.log(`Current : ${currentInfo.version}`)
+                    console.log(`Avabile : ${info.version}`)
+                    var ac = prompt("Update? [Y/N]: ");
+                    if (ac == "Y"){
+                      console.log("Downloading Updates.....")
+                      exec("./install.sh", (errors, stdouts, stderrs)=>{
+                        if (errors){
+                          console.log(errors)
+                          cmd()
+                        }else{
+                          console.log("Update Done, Try Relaunch")
+                        }
+                      })
+                    }
+                  }else{
+                    console.log("No Update Avabile")
+                    fs.rm("./temp.txt", err => {
+                      cmd()
+                    })
+                  }
+                }
+              })
+            }
+          })
+      }
+  });
   }
 }
 

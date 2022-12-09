@@ -4,4 +4,8 @@ cd MyShell
 echo "installing requirement"
 sudo apt install node npm -y
 npm i
+echo "Removing Template"
+rm -rf .git
+rm .gitgone
+rm README.md
 echo "Done, Start with cd MyShell and run npm start"
