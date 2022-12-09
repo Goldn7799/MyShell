@@ -1,12 +1,11 @@
 //import module
-const fs = require("fs");
-const prompt = require("prompt-sync")();
-const os = require("os");
-// const fetch = require("node-fetch");
-const { exec } = require("child_process");
-const { exit } = require("process");
-const { json } = require("stream/consumers");
-const { createSecretKey } = require("crypto");
+import fs from "fs";
+import promptSync from "prompt-sync";
+const prompt = promptSync();
+import os from "os";
+import fetch from "node-fetch";
+import { exec } from "child_process";
+import { exit } from "process";
 
 //prepeare
 console.clear()
@@ -14,6 +13,7 @@ console.log("Starting...")
 
 
 //setup variable
+var comments = '';
 let db = {}
 let history = []
 let lock = true
