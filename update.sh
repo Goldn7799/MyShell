@@ -3,7 +3,7 @@ cp ./db.json ../
 cp ./history.json ../
 rm -rf .
 echo "installing requirement"
-sudo apt install nodejs npm wget git
+sudo apt install nodejs npm wget git -y
 echo "Downloading JS"
 git clone https://github.com/Goldn7799/MyShell.git
 npm i
