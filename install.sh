@@ -6,6 +6,6 @@ cd MyShell
 npm i
 echo "Removing Template"
 rm -rf .git
-rm .gitgone
+rm .gitignore
 rm README.md
 echo "Done, Start with cd MyShell and run npm start"
