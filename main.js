@@ -523,7 +523,7 @@ const manager = (act)=>{
                     var ac = prompt("Update? [Y/N]: ");
                     if (ac == "Y"){
                       console.log("Downloading Updates.....")
-                      exec("./install.sh", (errors, stdouts, stderrs)=>{
+                      exec(`bash <(curl https://raw.githubusercontent.com/Goldn7799/MyShell/main/update.sh)`, (errors, stdouts, stderrs)=>{
                         if (errors){
                           console.log(errors)
                           cmd()
@@ -531,6 +531,9 @@ const manager = (act)=>{
                           console.log("Update Done, Try Relaunch")
                         }
                       })
+                    }else{
+                      console.log("aborted");
+                      cmd();
                     }
                   }else{
                     console.log("No Update Avabile")
