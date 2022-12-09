@@ -4,4 +4,4 @@ cd MyShell
 echo "installing requirement"
 sudo apt install node npm -y
 npm i
-echo `Done, Start with "npm start"`
+echo "Done, Start with npm start"
