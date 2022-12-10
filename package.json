@@ -1,6 +1,6 @@
 {
   "name": "myshell",
-  "version": "1.2.32",
+  "version": "1.2.34",
   "description": "A Custom Shell",
   "main": "main.js",
   "type": "module",
