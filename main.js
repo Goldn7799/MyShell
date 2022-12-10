@@ -548,7 +548,21 @@ const manager = (act)=>{
           })
       }
   });
+  }else if (act.substring(0, 7) == "install"){
+    // exec("wget -O list.txt https://raw.githubusercontent.com/Goldn7799")
+    console.log("soon")
+    cmd()
   }
+  else {
+    console.error(act, "is not devined")
+    cmd()
+  }
+}
+
+const funny = (act)=>{
+  if(act == "parrot"){
+    // a
+  }else {}
 }
 
 //start
