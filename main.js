@@ -415,6 +415,7 @@ const tools = (action)=>{
   }else if (action == "help"){
     console.log(`
       ddos //ddos tools
+      finder //IP Finder
       get //GET URL Information
       post //POST data or json
       post <json path> //POST file.json
@@ -462,6 +463,94 @@ const tools = (action)=>{
         }
       })
     }
+  }else if (action == "finder"){
+    let start = prompt("Start Ip [0]: ")
+    let end = prompt("End Ip [0] : ")
+    let head = prompt("Head Ip [0] : ")
+    let tail = prompt("Tail Ip [0] : ")
+    var methd = prompt("Method [GET, POST, PUT, DELETE] : ")
+    let speed = prompt("Speed/req [1REQ/MS] : ")
+    var IPS = "", IPA = "";
+    let dbs = [{"ip": "TEMP", "type": "default", "Redirected": true, "status": 200, "statusText": "Ok", "size": "NULL", "URL": "TEMP"}]
+    var log = ``;
+    let total = 0, succes = 0, failed = 0, loglimit = 0;
+    //display
+    const refresh = ()=>{
+      console.clear();
+      console.log(`
+IP : ${start}.${end}.${head}.${tail}
+Total Try : ${total}
+Method : ${methd}
+Speed : 1REQ/${speed}MS
+Succes : ${succes}
+Failed : ${failed}
+saved on lists-ip.txt
+----------LOG-----------
+${log}
+      `)
+    }
+    const run = setInterval(() => {
+      total++;
+      if(loglimit > 19){
+        loglimit = 0;
+        log = ``;
+      };
+      fetch(`http://${start}.${end}.${head}.${tail}/`, { method: methd }).then(res => {
+        if(res.status == "200"){
+          succes++;
+          loglimit++;
+          dbs.push({"ip": `${start}.${end}.${head}.${tail}`, "type": res.type, "Redirected": res.redirected, "status": res.status, "statusText": res.statusText, "size": res.size, "URL": res.url})
+          log += `
+  Succes ${methd} at ${`http://${start}.${end}.${head}.${tail}/`} status ${res.status} | ${res.statusText}`
+        }else {
+          failed++;
+          loglimit++;
+          log += `
+  Failed ${methd} at ${`http://${start}.${end}.${head}.${tail}/`} status ${res.status} | ${res.statusText}`
+        }
+      }).catch (err =>{
+        failed++;
+        loglimit++;
+        log += `
+  No Response ${methd} at ${`http://${start}.${end}.${head}.${tail}/`}`
+      })
+      tail++;
+      if (tail > 255){
+        tail = 0;
+        head++;
+      };
+      if(head > 255){
+        head = 0;
+        end++;
+      };
+      if (end > 255){
+        end = 0;
+        start++;
+      };
+      if(start > 255){
+        clearInterval(Display);
+        clearInterval(run);
+        clearInterval(Syncs);
+        console.log("end")
+        cmd()
+      };
+    }, speed);
+    const Display = setInterval(() => {
+      refresh()
+    }, 100);
+    const Syncs = setInterval(() => {
+      fs.writeFile("./lists-ip.txt", JSON.stringify(dbs), err=>{
+        if(err){
+          loglimit++;
+          log += `
+    Error : ${err}`
+        }else {
+          loglimit++;
+          log += `
+    Data Synced`
+        }
+      })
+    }, 2500);
   }
   else {
     console.error(`Try run "tools help"`);
